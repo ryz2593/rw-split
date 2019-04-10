@@ -71,10 +71,23 @@ Position = 154
 
 2 server-id = 2
 
+配置完成保存后，重启mysql服务器，再次登录MYSQL服务器
+
+解决Connection xxxx.reties 18 异常：
+
+必须在master端创建同步的账号和密码
+
+create user u_root identified by '123456';
+
+grant replication slave on *.* to 'u_root'@'%';
+
+flush privileges;
 
 在从服务器上执行如下SQL:
 
 change master to master_host='192.168.3.171',master_user='u_root',master_password='123456',master_log_file='master-bin.000002',master_log_pos=310
+
+NOTE:这两个参数master_log_file=master-bin.000002,master_log_pos=154必须和主库一致
 
 **2.1.3 启动主从配置**
 
@@ -83,6 +96,21 @@ mysql > start slave
 //检查slave是否配置成功
 
 mysql > show slave status \G
+
+开启远程访问：
+
+1 -- 创建用户、密码及权限范围 第一个root为用户名 @后为适用的主机 '%'表示所有电脑都可以访问连接，第二个root为密码
+
+2 mysql>GRANT ALL PRIVILEGES ON *.* TO 'root'@'%'IDENTIFIED BY '123456' WITH GRANT OPTION;
+
+3 Query ok, 0 rows affected
+
+4
+
+5 --立即生效
+
+6 mysql > flush privileges;
+
 
 
 
