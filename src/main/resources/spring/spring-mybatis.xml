@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+
+    <bean class="com.ryz2593.util.EncryptPropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:jdbc.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <!--数据库连接-->
+    <bean id="abstractDataSource" abstract="true"
+          class="com.alibaba.druid.pool.DruidDataSource" init-method="init"
+          destroy-method="close">
+        <property name="DriverClassName" value="${jdbc.driver}"/>
+        <!-- 配置初始化大小、最小、最大 -->
+        <property name="initialSize" value="${jdbc.initialPoolSize}"/>
+        <property name="minIdle" value="${jdbc.minPoolSize}"/>
+        <property name="maxActive" value="${jdbc.maxPoolSize}"/>
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="60000"/>
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="${jdbc.idleConnectionTestPeriod}"/>
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="${jdbc.maxIdleTime}"/>
+        <property name="validationQuery" value="SELECT 'x'"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false"/>
+        <!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+        <property name="poolPreparedStatements" value="false"/>
+        <property name="maxPoolPreparedStatementPerConnectionSize"
+                  value="20"/>
+        <!-- 配置监控统计拦截的filters -->
+        <property name="filters" value="stat,log4j"/>
+        <property name="timeBetweenLogStatsMillis" value="60000"/>
+        <property name="connectionProperties"
+                  value="druid.stat.logSlowSql=true;druid.stat.slowSqlMillis=500;druid.stat.mergeSql=true"/>
+    </bean>
+
+    <!-- P365 datasource -->
+    <bean id="master" parent="abstractDataSource">
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url" value="${jdbc.master.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <bean id="slave" parent="abstractDataSource">
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url" value="${jdbc.slave.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <!--配置动态路由-->
+    <bean id="dynamicDataSourceRouting" class="com.ryz2593.mapper.rws.DynamicDataSouce">
+        <property name="targetDataSources">
+            <map>
+                <entry key="master" value-ref="master"/>
+                <entry key="master" value-ref="slave"/>
+            </map>
+        </property>
+    </bean>
+
+    <!--配置数据源-->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy">
+        <property name="targetDataSource" ref="dynamicDataSourceRouting"/>
+    </bean>
+
+
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="configLocation" value="classpath:mybatis-config.xml" />
+        <property name="mapperLocations">
+            <list>
+                <value>classpath:mapper/base/*.xml</value>
+                <value>classpath:mapper/extend/*.xml</value>
+            </list>
+        </property>
+        <!--<property name="mapperLocations" value="classpath:sqlmaps/*.xml"/>-->
+        <!-- 配置Mybatis的插件plugin-->
+        <!--<property name="plugins">-->
+            <!--<array>-->
+                <!--<bean class="com.arcsoft.perfect365.mybatis.plugins.PagePlugin">-->
+                    <!--<property name="dialect" value="mysql"/>-->
+                    <!--<property name="pageSqlId" value=".*listPage.*"/>-->
+                <!--</bean>-->
+            <!--</array>-->
+        <!--</property>-->
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.ryz2593.mapper"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+
+
+</beans>
