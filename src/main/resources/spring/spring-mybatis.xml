@@ -61,7 +61,7 @@
     </bean>
 
     <!--配置动态路由-->
-    <bean id="dynamicDataSourceRouting" class="com.ryz2593.mapper.rws.DynamicDataSouce">
+    <bean id="dynamicDataSourceRouting" class="com.ryz2593.mapper.rws.DynamicDataSource">
         <property name="targetDataSources">
             <map>
                 <entry key="master" value-ref="master"/>
