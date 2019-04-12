@@ -1,6 +1,8 @@
 # rw-split
 MySQL read and write seperate
 
+**包含数据源加密工具类**
+
 数据库读写分离
 
 在spring中配置多个数据源，增删改走主库，查询走从库
