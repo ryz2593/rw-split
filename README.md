@@ -9,9 +9,9 @@ MySQL read and write seperate
 
 <img src="https://img-blog.csdn.net/20130429111107055" />
 
-编写DynamicDataSource类，继承AbstractRoutingDataSource类，重写determineCurrentLookupKey()方法
+**编写DynamicDataSource类，继承AbstractRoutingDataSource类，重写determineCurrentLookupKey()方法**
 
-编写读写分离路由插件类DynamicDataSourcePlugin，实现Interceptor接口，根据mybatis sql执行机制，进行拦截，使用不同的策略（master, slave）
+**编写读写分离路由插件类DynamicDataSourcePlugin，实现Interceptor接口，根据mybatis sql执行机制，进行拦截，使用不同的策略（master, slave）**
 
 **mysql主从复制用途**
 
