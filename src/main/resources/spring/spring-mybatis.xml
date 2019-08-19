@@ -81,6 +81,9 @@
         <property name="dataSource" ref="dataSource"/>
     </bean>
 
+    <!--事务配置要在datasourceHolder之前配置-->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
 
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
@@ -103,9 +106,7 @@
         <!--</property>-->
     </bean>
 
-    <tx:annotation-driven transaction-manager="transactionManager"/>
-
-
+    
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="basePackage" value="com.ryz2593.mapper"/>
         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
