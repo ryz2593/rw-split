@@ -78,7 +78,9 @@
 
     <bean id="transactionManager"
           class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-        <property name="dataSource" ref="dataSource"/>
+        <!--property name="dataSource" ref="dataSource"/-->
+          <!--这里在线上环境出现了问题，会出现数据源切换不成功，所以改为了master-->
+        <property name="dataSource" ref="master"/>
     </bean>
 
     <!--事务配置要在datasourceHolder之前配置-->
