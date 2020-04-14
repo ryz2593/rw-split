@@ -75,7 +75,7 @@ public class DESUtils {
     }
 
     public static void main(String[] args) {
-        String cod = getEncryptString("Arcsoft01");
+        String cod = getEncryptString("test01");
         System.out.println(cod);
 
         System.out.println(getDecryptString(getEncryptString("123456")));
